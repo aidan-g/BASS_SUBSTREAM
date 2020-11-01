@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net40;net461</TargetFrameworks>
+    <AssemblyName>ManagedBass.Substream.Tests</AssemblyName>
+    <OutputPath>..\distribution\$(Platform)\</OutputPath>
+    <Platforms>x86;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ManagedBass" Condition="'$(TargetFramework)' == 'net40'">
+      <HintPath>..\lib\net40\ManagedBass.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ManagedBass" Condition="'$(TargetFramework)' == 'net461'">
+      <HintPath>..\lib\net461\ManagedBass.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ManagedBass.Substream\ManagedBass.Substream.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net40;net461</TargetFrameworks>
+    <AssemblyName>ManagedBass.Substream</AssemblyName>
+    <OutputPath>..\distribution\$(Platform)\</OutputPath>
+    <Platforms>x86;x64</Platforms>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(Platform)' == 'x86'">
+    <None Include="..\lib\x86\bass_substream.dll" Link="bass_substream.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Platform)' == 'x64'">
+    <None Include="..\lib\x64\bass_substream.dll" Link="bass_substream.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ManagedBass" Condition="'$(TargetFramework)' == 'net40'">
+      <HintPath>..\lib\net40\ManagedBass.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ManagedBass" Condition="'$(TargetFramework)' == 'net461'">
+      <HintPath>..\lib\net461\ManagedBass.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
