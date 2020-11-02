@@ -31,11 +31,47 @@ const ADDON_FUNCTIONS addon_functions = {
 	NULL
 };
 
+BOOL is_initialized = FALSE;
+
+#define MAX_CONFIGS 10
+
+static DWORD config[MAX_CONFIGS] = { 0 };
+
 //I have no idea how to prevent linking against this routine in msvcrt.
 //It doesn't exist on Windows XP.
 //Hopefully it doesn't do anything important.
 int _except_handler4_common() {
 	return 0;
+}
+
+BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_Init)() {
+	if (is_initialized) {
+		return FALSE;
+	}
+	BASS_SUBSTREAM_SetConfig(SS_FREEPARENT, FALSE);
+	is_initialized = TRUE;
+#if _DEBUG
+	printf("BASS SUBSTREAM initialized.\n");
+#endif
+	return TRUE;
+}
+
+BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_SetConfig)(SS_ATTRIBUTE attrib, DWORD value) {
+	config[attrib] = value;
+#if _DEBUG
+	printf("Setting config: %d = %d\n", attrib, value);
+#endif
+	return TRUE;
+}
+
+BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_GetConfig)(SS_ATTRIBUTE attrib, DWORD* value) {
+	if (*value = config[attrib]) {
+#if _DEBUG
+		printf("Getting config: %d = %d\n", attrib, *value);
+#endif
+		return TRUE;
+	}
+	return FALSE;
 }
 
 HSTREAM BASSSUBSTREAMDEF(BASS_SUBSTREAM_StreamCreate)(HSTREAM handle, QWORD offset, QWORD length, DWORD flags) {
@@ -130,9 +166,10 @@ QWORD BASSSUBSTREAMDEF(BASS_SUBSTREAM_SetPosition)(void* inst, QWORD position, D
 }
 
 VOID BASSSUBSTREAMDEF(BASS_SUBSTREAM_Free)(void* inst) {
+	DWORD free_parent;
 	SUBSTREAM* substream = inst;
 	if (substream) {
-		if ((substream->flags & BASS_STREAM_AUTOFREE) == BASS_STREAM_AUTOFREE) {
+		if (BASS_SUBSTREAM_GetConfig(SS_FREEPARENT, &free_parent)) {
 			BASS_StreamFree(substream->handle);
 		}
 		free(substream);

@@ -5,6 +5,19 @@
 #define BASSSUBSTREAMDEF(f) WINAPI f
 #endif
 
+typedef enum {
+	SS_FREEPARENT = 1,
+} SS_ATTRIBUTE;
+
+__declspec(dllexport)
+BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_Init)();
+
+__declspec(dllexport)
+BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_SetConfig)(SS_ATTRIBUTE attrib, DWORD value);
+
+__declspec(dllexport)
+BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_GetConfig)(SS_ATTRIBUTE attrib, DWORD* value);
+
 __declspec(dllexport)
 HSTREAM BASSSUBSTREAMDEF(BASS_SUBSTREAM_StreamCreate)(HSTREAM handle, QWORD offset, QWORD length, DWORD flags);
 
