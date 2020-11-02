@@ -83,6 +83,9 @@ HSTREAM BASSSUBSTREAMDEF(BASS_SUBSTREAM_StreamCreate)(HSTREAM handle, QWORD offs
 #endif
 		return BASS_ERROR_UNKNOWN;
 	}
+	if (!length) {
+		length = BASS_ChannelGetLength(handle, BASS_POS_BYTE) - offset;
+	}
 	substream = malloc(sizeof(SUBSTREAM));
 	substream->handle = handle;
 	substream->offset = offset;
