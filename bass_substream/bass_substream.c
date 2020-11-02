@@ -160,7 +160,11 @@ BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_CanSetPosition)(void* inst, QWORD position,
 QWORD BASSSUBSTREAMDEF(BASS_SUBSTREAM_SetPosition)(void* inst, QWORD position, DWORD mode) {
 	SUBSTREAM* substream = inst;
 	if (mode == BASS_POS_BYTE) {
-		BASS_ChannelSetPosition(substream->handle, substream->offset + position, mode);
+		if (!BASS_ChannelSetPosition(substream->handle, substream->offset + position, mode)) {
+			errorn(BASS_ERROR_POSITION);
+			return 0;
+		}
+		return position;
 	}
 	else {
 		errorn(BASS_ERROR_NOTAVAIL);
