@@ -117,6 +117,66 @@ namespace ManagedBass.Substream.Tests
             }
         }
 
+        [TestCase("01 Botanical Dimensions.m4a", null, "00:01:00")]
+        [TestCase("01 Botanical Dimensions.m4a", "00:01:00", "00:01:00")]
+        [TestCase("01 Botanical Dimensions.m4a", "00:02:00", "00:01:00")]
+        [TestCase("01 Botanical Dimensions.m4a", "00:03:00", null)]
+        public void Test003(string name, string offset, string length)
+        {
+            if (!Bass.Init(Bass.DefaultDevice))
+            {
+                Assert.Fail(string.Format("Failed to initialize BASS: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            var fileName = Path.Combine(Location, "Media", name);
+            var sourceChannel = Bass.CreateStream(fileName, 0, 0, BassFlags.Decode);
+            if (sourceChannel == 0)
+            {
+                Assert.Fail(string.Format("Failed to create source stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            var playbackChannel = BassSubstream.CreateStream(sourceChannel, GetPosition(sourceChannel, offset), GetPosition(sourceChannel, length));
+            if (playbackChannel == 0)
+            {
+                Assert.Fail(string.Format("Failed to create playback stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            var channelLength = Bass.ChannelGetLength(playbackChannel);
+            var channelLengthSeconds = Bass.ChannelBytes2Seconds(playbackChannel, channelLength);
+
+            if (!Bass.ChannelPlay(playbackChannel))
+            {
+                Assert.Fail(string.Format("Failed to start playback stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            if (!Bass.ChannelSetPosition(playbackChannel, GetPosition(playbackChannel, "00:00:30"), PositionFlags.Bytes))
+            {
+                Assert.Fail(string.Format("Failed to set playback position: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            Thread.Sleep(1000);
+
+            if (Bass.ChannelGetPosition(playbackChannel, PositionFlags.Bytes) < GetPosition(playbackChannel, "00:00:30"))
+            {
+                Assert.Fail("Playback position was less than expected.");
+            }
+
+            if (!Bass.StreamFree(playbackChannel))
+            {
+                Assert.Fail(string.Format("Failed to free the playback stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            if (!Bass.StreamFree(sourceChannel))
+            {
+                Assert.Fail(string.Format("Failed to free the source stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            if (!Bass.Free())
+            {
+                Assert.Fail(string.Format("Failed to free BASS: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+        }
+
         private static long GetPosition(int handle, string position)
         {
             if (string.IsNullOrEmpty(position))
