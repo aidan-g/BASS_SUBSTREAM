@@ -84,7 +84,7 @@ namespace ManagedBass.Substream.Tests
             {
                 return 0;
             }
-            var offset = TimeSpan.Parse(position).TotalMilliseconds;
+            var offset = TimeSpan.Parse(position).TotalSeconds;
             return Bass.ChannelSeconds2Bytes(handle, offset);
         }
     }

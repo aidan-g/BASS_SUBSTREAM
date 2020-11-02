@@ -64,6 +64,11 @@ HSTREAM BASSSUBSTREAMDEF(BASS_SUBSTREAM_StreamCreate)(HSTREAM handle, QWORD offs
 		BASS_SUBSTREAM_Free(substream);
 		return 0;
 	}
+	if (!BASS_ChannelSetPosition(substream->handle, offset, BASS_POS_BYTE)) {
+		BASS_StreamFree(substream->handle);
+		BASS_SUBSTREAM_Free(substream);
+		return 0;
+	}
 	return handle;
 }
 
@@ -99,13 +104,17 @@ VOID BASSSUBSTREAMDEF(BASS_SUBSTREAM_GetInfo)(void* inst, BASS_CHANNELINFO* info
 }
 
 BOOL BASSSUBSTREAMDEF(BASS_SUBSTREAM_CanSetPosition)(void* inst, QWORD position, DWORD mode) {
+	SUBSTREAM* substream = inst;
 	if (mode == BASS_POS_BYTE) {
-		//Because we're always file backed the position should always be valid.
+		if (position < 0 || position > substream->length) {
+			errorn(BASS_ERROR_POSITION);
+			return FALSE;
+		}
 		return TRUE;
 	}
 	else {
 		errorn(BASS_ERROR_NOTAVAIL);
-		return 0;
+		return FALSE;
 	}
 }
 
@@ -122,5 +131,10 @@ QWORD BASSSUBSTREAMDEF(BASS_SUBSTREAM_SetPosition)(void* inst, QWORD position, D
 
 VOID BASSSUBSTREAMDEF(BASS_SUBSTREAM_Free)(void* inst) {
 	SUBSTREAM* substream = inst;
-	free(substream);
+	if (substream) {
+		if ((substream->flags & BASS_STREAM_AUTOFREE) == BASS_STREAM_AUTOFREE) {
+			BASS_StreamFree(substream->handle);
+		}
+		free(substream);
+	}
 }
