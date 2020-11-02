@@ -38,6 +38,11 @@ namespace ManagedBass.Substream.Tests
             var channelLength = Bass.ChannelGetLength(playbackChannel);
             var channelLengthSeconds = Bass.ChannelBytes2Seconds(playbackChannel, channelLength);
 
+            if (!Bass.ChannelPlay(playbackChannel))
+            {
+                Assert.Fail(string.Format("Failed to start playback stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
             do
             {
                 if (Bass.ChannelIsActive(playbackChannel) == PlaybackState.Stopped)
@@ -57,14 +62,14 @@ namespace ManagedBass.Substream.Tests
                 Thread.Sleep(1000);
             } while (true);
 
-            if (!Bass.StreamFree(sourceChannel))
-            {
-                Assert.Fail(string.Format("Failed to free the source stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
-            }
-
             if (!Bass.StreamFree(playbackChannel))
             {
                 Assert.Fail(string.Format("Failed to free the playback stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
+            }
+
+            if (!Bass.StreamFree(sourceChannel))
+            {
+                Assert.Fail(string.Format("Failed to free the source stream: {0}", Enum.GetName(typeof(Errors), Bass.LastError)));
             }
 
             if (!Bass.Free())
@@ -75,6 +80,10 @@ namespace ManagedBass.Substream.Tests
 
         private static long GetPosition(int handle, string position)
         {
+            if (string.IsNullOrEmpty(position))
+            {
+                return 0;
+            }
             var offset = TimeSpan.Parse(position).TotalMilliseconds;
             return Bass.ChannelSeconds2Bytes(handle, offset);
         }
