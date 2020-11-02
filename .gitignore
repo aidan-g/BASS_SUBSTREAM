@@ -122,4 +122,5 @@ runtime_env/
 source/.vs/
 
 #libs
-lib/bass_dts*
+lib/x86/bass_substream*
+lib/x64/bass_substream*
